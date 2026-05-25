@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Hackathon DLA — Profesor</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--dark:#080e18;--sur:#0f1c2e;--su2:#162338;--crd:#121e30;--gld:#FFD700;--grn:#00e5a0;--wht:#f0f6ff;--mut:#4a6280;--bdr:#1e3050;--red:#EF4444;--blue:#1E90FF;--org:#FF6B00}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--wht);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;padding:.55rem 1rem;background:var(--sur);border-bottom:1px solid var(--bdr);gap:.75rem;flex-shrink:0}
+.topbar-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.1em;color:var(--grn)}
+.topbar-phase{font-size:.75rem;font-weight:700;padding:.28rem .8rem;border-radius:50px;background:var(--su2);color:var(--mut);border:1px solid var(--bdr);letter-spacing:.06em}
+.topbar-phase.active{background:rgba(0,229,160,.12);color:var(--grn);border-color:var(--grn)}
+.spacer{flex:1}
+.phase-btns{display:flex;gap:.5rem}
+.pbtn{font-family:'DM Sans',sans-serif;font-weight:700;font-size:.78rem;padding:.5rem 1rem;border-radius:50px;border:none;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.pbtn:hover{transform:translateY(-1px)}.pbtn:active{transform:translateY(0)}
+.pbtn.start1{background:var(--blue);color:#fff}
+.pbtn.start2{background:var(--org);color:#fff}
+.pbtn.end{background:var(--red);color:#fff}
+.pbtn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+/* LAYOUT */
+.main{flex:1;display:flex;overflow:hidden}
+.lpanel{width:220px;flex-shrink:0;background:var(--sur);border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden}
+.cpanel{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.rpanel{width:260px;flex-shrink:0;background:var(--sur);border-left:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden}
+.ptitle{font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:.12em;color:var(--mut);padding:.55rem .9rem .3rem;text-transform:uppercase;border-bottom:1px solid var(--bdr);flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
+.ptitle-count{font-size:.85rem;color:var(--gld);font-family:monospace}
+
+/* groups panel */
+.groups-list{flex:1;overflow-y:auto;padding:.5rem}
+.group-item{background:var(--su2);border-radius:8px;padding:.5rem .65rem;margin-bottom:.35rem;border:1px solid var(--bdr)}
+.gi-name{font-size:.85rem;font-weight:700;color:var(--wht)}
+.gi-score{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--gld);float:right}
+.gi-code{font-size:.65rem;color:var(--mut);font-family:'JetBrains Mono',monospace;letter-spacing:.1em}
+.gi-members{font-size:.7rem;color:var(--mut);margin-top:.15rem}
+
+/* queue */
+.queue-body{flex:1;overflow-y:auto;padding:.5rem;display:flex;flex-direction:column;gap:.5rem}
+.empty-queue{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--mut);font-size:.85rem;gap:.5rem;text-align:center;padding:1rem}
+.sub-card{background:var(--su2);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;animation:cin .3s ease;display:flex;flex-direction:column;max-height:380px}
+.sub-body{overflow-y:auto;flex:1;padding:.6rem .8rem}
+.sub-actions-fixed{padding:.5rem .8rem;border-top:1px solid var(--bdr);display:flex;gap:.45rem;flex-shrink:0;background:var(--su2)}
+.img-strip{display:flex;gap:.4rem;overflow-x:auto;padding-bottom:.3rem;margin-bottom:.5rem}
+.img-strip::-webkit-scrollbar{height:4px}.img-strip::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
+@keyframes cin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.sub-header{padding:.6rem .8rem;display:flex;align-items:center;gap:.5rem;border-bottom:1px solid var(--bdr)}
+.sub-group{font-size:.82rem;font-weight:700;color:var(--grn)}
+.sub-prob{font-size:.75rem;color:var(--mut);flex:1}
+.sub-pts{font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--gld)}
+.sub-attempt{font-size:.65rem;color:var(--mut)}
+.sub-body{padding:.6rem .8rem}
+.sub-text{font-size:.8rem;color:var(--wht);line-height:1.5;white-space:pre-wrap;max-height:120px;overflow-y:auto;background:var(--crd,#121e30);border-radius:6px;padding:.5rem;margin-bottom:.5rem}
+.sub-img{width:80px;height:80px;object-fit:cover;border-radius:6px;cursor:zoom-in;display:block}
+.sub-actions{display:flex;gap:.45rem} /* legacy */
+.vbtn{flex:1;padding:.6rem;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .15s}
+.vbtn:active{transform:scale(.96)}
+.vbtn.ok{background:var(--grn);color:var(--dark)}
+.vbtn.bad{background:var(--red);color:#fff}
+.vbtn.skip{background:var(--su2);color:var(--mut);border:1px solid var(--bdr);flex:0 0 auto;font-size:.75rem;padding:.6rem .75rem}
+
+/* scoreboard panel */
+.sb-body{flex:1;overflow-y:auto;padding:.5rem}
+.sb-row{display:flex;align-items:center;gap:.55rem;padding:.45rem .65rem;background:var(--su2);border-radius:8px;margin-bottom:.3rem;border:1px solid var(--bdr)}
+.sb-pos{font-size:.8rem;font-weight:900;min-width:1.5ch;color:var(--mut)}
+.sb-pos.g{color:var(--gld)}.sb-pos.s{color:#aaa}.sb-pos.b{color:#cd7f32}
+.sb-name{flex:1;font-size:.82rem;font-weight:700}
+.sb-score{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--gld)}
+.sb-bar{height:3px;background:var(--bdr);border-radius:2px;margin-top:.2rem;overflow:hidden}
+.sb-bar-fill{height:100%;background:linear-gradient(90deg,var(--grn),var(--gld));border-radius:2px;transition:width .5s ease}
+.sb-attempts{display:flex;gap:2px;margin-left:.25rem}
+.sb-adot{width:6px;height:6px;border-radius:50%}
+
+/* image zoom overlay */
+.zoom-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;align-items:center;justify-content:center;cursor:zoom-out}
+.zoom-bg.on{display:flex}
+.zoom-img{max-width:95vw;max-height:95vh;border-radius:12px;object-fit:contain}
+
+/* problem viewer */
+.cpanel-body{flex:1;overflow-y:auto;padding:1rem}
+.prob-viewer{background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:1rem;margin-bottom:.75rem}
+.pv-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.08em;color:var(--grn);margin-bottom:.3rem}
+.pv-section{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--mut);font-weight:700;margin-bottom:.5rem}
+.pv-prompt{font-size:.85rem;color:var(--wht);line-height:1.65;background:var(--su2);border-radius:8px;padding:.8rem;white-space:pre-wrap;margin-bottom:.5rem}
+.pv-hint{font-size:.75rem;color:var(--mut);border-left:3px solid var(--gld);padding:.5rem .7rem;border-radius:0 6px 6px 0;line-height:1.5}
+.pv-hint strong{color:var(--gld)}
+.pv-pts{font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--gld);margin-bottom:.4rem}
+
+/* phase banner in center */
+.phase-banner{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:1rem;text-align:center;padding:2rem}
+.pb-title{font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:.1em;color:var(--grn)}
+.pb-sub{font-size:.9rem;color:var(--mut);max-width:400px;line-height:1.6}
+.pb-btn{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.1em;padding:.8rem 2.5rem;border:none;border-radius:50px;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.pb-btn.s1{background:var(--blue);color:#fff;box-shadow:0 0 30px rgba(30,144,255,.3)}
+.pb-btn:hover{transform:scale(1.04)}
+.pb-btn:active{transform:scale(.97)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-title">HACKATHON DLA</div>
+  <div class="topbar-phase" id="phase-badge">LOBBY</div>
+  <div class="spacer"></div>
+  <div class="phase-btns">
+    <button class="pbtn start1" id="pbtn-s1" onclick="setPhase('section1')">▶ Iniciar Sección 1</button>
+    <button class="pbtn start2" id="pbtn-s2" onclick="setPhase('section2')" disabled>▶ Sección 2</button>
+    <button class="pbtn end" id="pbtn-end" onclick="setPhase('done')" disabled>⏹ Finalizar</button>
+  </div>
+</div>
+
+<div class="main">
+  <!-- LEFT: Groups -->
+  <div class="lpanel">
+    <div class="ptitle">Grupos <span class="ptitle-count" id="group-count">0</span></div>
+    <div class="groups-list" id="groups-list"></div>
+  </div>
+
+  <!-- CENTER: Problems + phase banner -->
+  <div class="cpanel">
+    <div class="cpanel-body" id="cpanel-body">
+      <div class="phase-banner">
+        <div class="pb-title">⚡ HACKATHON</div>
+        <div class="pb-sub">Los grupos se están conectando. Cuando todos estén listos, presiona <strong>Iniciar Sección 1</strong>.</div>
+        <button class="pb-btn s1" onclick="setPhase('section1')">▶ INICIAR SECCIÓN 1</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Queue + Scoreboard -->
+  <div class="rpanel" style="display:flex;flex-direction:column">
+    <!-- Queue -->
+    <div style="flex:1;display:flex;flex-direction:column;border-bottom:2px solid var(--bdr);min-height:0">
+      <div class="ptitle">Cola de revisión <span class="ptitle-count" id="queue-count">0</span></div>
+      <div class="queue-body" id="queue-body">
+        <div class="empty-queue"><span style="font-size:1.8rem">📭</span>Sin entregas pendientes</div>
+      </div>
+    </div>
+    <!-- Scoreboard -->
+    <div style="flex:1;display:flex;flex-direction:column;min-height:0">
+      <div class="ptitle">Marcador <span class="ptitle-count" id="total-groups">0</span></div>
+      <div class="sb-body" id="sb-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Image zoom -->
+<div class="zoom-bg" id="zoom-bg" onclick="closeZoom()">
+  <img class="zoom-img" id="zoom-img">
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+var socket = io();
+var problems = {s1:[], s2:[]};
+var currentPhase = 'lobby';
+var maxScore = 0;
+
+function G(id){return document.getElementById(id);}
+
+socket.emit('getProblems');
+socket.emit('prof:getQueue');
+
+socket.on('problems', function(p){
+  problems=p;
+  renderProblems();
+  // compute max possible score
+  var s=0;
+  p.s1.forEach(function(x){s+=x.pts});
+  p.s2.forEach(function(x){s+=x.pts});
+  maxScore=s;
+});
+
+// ── Phase ──────────────────────────────────────────────────────────────
+function setPhase(p){
+  if(!confirm('¿Confirmas cambiar a fase: '+p+'?')) return;
+  socket.emit('prof:setPhase',{phase:p});
+}
+
+socket.on('state', function(s){
+  currentPhase=s.phase;
+  updatePhaseUI(s.phase);
+  if(s.scoreboard) renderScoreboard(s.scoreboard);
+  G('queue-count').textContent=s.queueLen||0;
+});
+
+socket.on('phaseChanged', function(p){
+  currentPhase=p;
+  updatePhaseUI(p);
+});
+
+function updatePhaseUI(p){
+  var badge=G('phase-badge');
+  var labels={lobby:'LOBBY',section1:'SECCIÓN 1 ACTIVA',section2:'SECCIÓN 2 ACTIVA',done:'FINALIZADO'};
+  badge.textContent=labels[p]||p.toUpperCase();
+  badge.className='topbar-phase'+(p!=='lobby'?' active':'');
+  G('pbtn-s1').disabled=(p!=='lobby');
+  G('pbtn-s2').disabled=(p!=='section1');
+  G('pbtn-end').disabled=(p==='lobby'||p==='done');
+  if(p==='section1'||p==='section2'||p==='done') renderProblems();
+}
+
+// ── Groups ─────────────────────────────────────────────────────────────
+socket.on('groups', function(list){
+  G('group-count').textContent=list.length;
+  G('total-groups').textContent=list.length;
+  G('groups-list').innerHTML=list.map(function(g){
+    var total=Object.values(g.scores||{}).reduce(function(a,b){return a+b;},0);
+    var membersHTML=(g.members||[]).map(function(m){
+      return '<div style="font-size:.72rem;color:var(--mut);padding:.15rem 0;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:.35rem"><span>&#128100;</span><span>'+escHtml(m)+'</span></div>';
+    }).join('');
+    var gid='mg-'+g.id;
+    return '<div class="group-item" data-mgid="'+gid+'" style="cursor:pointer">'+
+      '<span class="gi-score">'+total+'</span>'+
+      '<div class="gi-name">'+escHtml(g.name)+' <span style="font-size:.65rem;color:var(--mut)">&#9660;</span></div>'+
+      '<div class="gi-code">Código: '+g.code+'</div>'+
+      '<div class="gi-members">&#128101; '+(g.members||[]).length+' integrante'+((g.members||[]).length!==1?'s':'')+'</div>'+
+      '<div id="'+gid+'" style="display:none;margin-top:.4rem;border-top:1px solid var(--bdr);padding-top:.35rem">'+membersHTML+'</div>'+
+    '</div>';
+  }).join('');
+  G('groups-list').querySelectorAll('[data-mgid]').forEach(function(el){
+    el.addEventListener('click',function(){ toggleMembers(el.getAttribute('data-mgid')); });
+  });
+});
+
+// ── Queue ──────────────────────────────────────────────────────────────
+socket.on('newSubmission', function(sub){
+  addToQueue(sub);
+  G('queue-count').textContent=parseInt(G('queue-count').textContent||0)+1;
+});
+
+socket.on('queueUpdate', function(queue){
+  G('queue-count').textContent=queue.length;
+  var body=G('queue-body');
+  if(queue.length===0){
+    body.innerHTML='<div class="empty-queue"><span style="font-size:1.8rem">✅</span>Cola vacía</div>';
+    return;
+  }
+  body.innerHTML='';
+  queue.forEach(function(sub){ body.appendChild(buildSubCard(sub)); });
+});
+
+function addToQueue(sub){
+  var body=G('queue-body');
+  var empty=body.querySelector('.empty-queue');
+  if(empty) empty.remove();
+  body.insertBefore(buildSubCard(sub), body.firstChild);
+}
+
+function buildSubCard(sub){
+  var allProbs=problems.s1.concat(problems.s2);
+  var prob=allProbs.find(function(p){return p.id===sub.problemId;})||{title:sub.problemId,pts:'?'};
+  var div=document.createElement('div');
+  div.className='sub-card'; div.id='sub-'+sub.id;
+  var attLeft=sub.attemptsLeft||3;
+  var dots='';
+  for(var i=0;i<3;i++) dots+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+(i<attLeft?'var(--grn)':'var(--bdr)')+'"></span>';
+  var imgs=sub.images&&sub.images.length?sub.images:(sub.imageData?[sub.imageData]:[]);
+  // Images as horizontal scrollable thumbnails
+  var imgStrip=imgs.length>0
+    ? '<div class="img-strip">'+imgs.map(function(src){
+        return '<img class="sub-img" src="'+src+'" onclick="zoomImg(this.src)" title="Clic para ampliar">';
+      }).join('')+'</div>'
+      +'<div style="font-size:.65rem;color:var(--mut);margin-bottom:.35rem">'+imgs.length+' foto'+(imgs.length!==1?'s':'')+' — clic para ampliar</div>'
+    : '';
+  var textHTML=sub.text?'<div class="sub-text">'+escHtml(sub.text)+'</div>':'';
+  div.innerHTML=
+    '<div class="sub-header">'+
+      '<div>'+
+        '<div class="sub-group">'+escHtml(sub.groupName)+'</div>'+
+        '<div class="sub-prob">'+prob.difficulty+' '+escHtml(prob.title)+'</div>'+
+      '</div>'+
+      '<div style="text-align:right">'+
+        '<div class="sub-pts">+'+prob.pts+' pts</div>'+
+        '<div style="display:flex;gap:3px;justify-content:flex-end;margin-top:2px">'+dots+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="sub-body">'+
+      imgStrip+
+      textHTML+
+    '</div>'+
+    '<div class="sub-actions-fixed">'+
+      '<button class="vbtn ok" onclick="review(&quot;'+sub.id+'&quot;,true)">&#x2705; Correcto</button>'+
+      '<button class="vbtn bad" onclick="review(&quot;'+sub.id+'&quot;,false)">&#x274C; Incorrecto</button>'+
+      '<button class="vbtn skip" onclick="skipSub(&quot;'+sub.id+'&quot;)">&#x23ED;</button>'+
+    '</div>';
+  return div;
+}
+
+function review(subId, correct){
+  socket.emit('prof:review',{subId:subId,correct:correct});
+  var card=G('sub-'+subId);
+  if(card) card.style.opacity='.4';
+}
+
+function skipSub(subId){
+  socket.emit('prof:skip',{subId:subId});
+  var card=G('sub-'+subId);
+  if(card){ card.style.animation='none'; card.style.opacity='0'; setTimeout(function(){if(card)card.remove();},300); }
+}
+
+// ── Scoreboard ────────────────────────────────────────────────────────
+function renderScoreboard(list){
+  var posIcons=['🥇','🥈','🥉'];
+  var posCls=['g','s','b'];
+  var top=list.length>0?list[0].total:1;
+  G('sb-body').innerHTML=list.map(function(g,i){
+    var pct=top>0?Math.round(g.total/top*100):0;
+    return '<div class="sb-row">'+
+      '<div class="sb-pos '+(posCls[i]||'')+'">'+(i<3?posIcons[i]:(i+1)+'.')+'</div>'+
+      '<div style="flex:1">'+
+        '<div style="display:flex;align-items:center">'+
+          '<span class="sb-name">'+escHtml(g.name)+'</span>'+
+          '<span class="sb-score">'+g.total+'</span>'+
+        '</div>'+
+        '<div class="sb-bar"><div class="sb-bar-fill" style="width:'+pct+'%"></div></div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+// ── Problems in center ────────────────────────────────────────────────
+function renderProblems(){
+  var body=G('cpanel-body');
+  if(currentPhase==='lobby'){
+    body.innerHTML='<div class="phase-banner"><div class="pb-title">⚡ HACKATHON</div><div class="pb-sub">Los grupos se están conectando. Cuando todos estén listos, presiona Iniciar Sección 1.</div><button class="pb-btn s1" onclick="setPhase(\'section1\')">▶ INICIAR SECCIÓN 1</button></div>';
+    return;
+  }
+  var html='';
+  // Section 1
+  html+='<div style="font-family:Bebas Neue,sans-serif;font-size:.9rem;letter-spacing:.12em;color:var(--mut);margin-bottom:.65rem;padding-bottom:.4rem;border-bottom:1px solid var(--bdr)">SECCIÓN 1 — DEL PROBLEMA AL DISEÑO</div>';
+  problems.s1.forEach(function(p){
+    html+=buildProbCard(p,'s1');
+  });
+  html+='<div style="font-family:Bebas Neue,sans-serif;font-size:.9rem;letter-spacing:.12em;color:var(--mut);margin:1rem 0 .65rem;padding-bottom:.4rem;border-bottom:1px solid var(--bdr)">SECCIÓN 2 — DEL DISEÑO AL ALGORITMO</div>';
+  problems.s2.forEach(function(p){
+    html+=buildProbCard(p,'s2');
+  });
+  body.innerHTML=html;
+}
+
+function buildProbCard(p,section){
+  return '<div class="prob-viewer">'+
+    '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem">'+
+      '<span style="font-size:1rem">'+p.difficulty+'</span>'+
+      '<div class="pv-title">'+p.title+'</div>'+
+      '<span class="pv-pts" style="margin-left:auto">+'+p.pts+' pts</span>'+
+    '</div>'+
+    '<div class="pv-prompt">'+escHtml(p.prompt)+'</div>'+
+    '<div class="pv-hint"><strong>💡 Pista para el profesor:</strong> '+p.hint+'</div>'+
+  '</div>';
+}
+
+// ── Zoom ──────────────────────────────────────────────────────────────
+function zoomImg(src){ G('zoom-img').src=src; G('zoom-bg').classList.add('on'); }
+function closeZoom(){ G('zoom-bg').classList.remove('on'); }
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeZoom(); });
+
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toggleMembers(id){ var el=document.getElementById(id); if(el) el.style.display=el.style.display==='none'?'block':'none'; }
+</script>
+</body>
+</html>
