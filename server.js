@@ -54,9 +54,9 @@ const PROBLEMS = {
 ENTRADAS: num1, num2
 PROCESO:
   • Si num1 > num2 → mayor = num1
-  • Si no → mayor = num2
+  • de otro modo si → mayor = num2
 SALIDAS: mayor`,
-      hint: 'Usa la estructura si/sino correctamente. La prueba de escritorio debe trazar los valores paso a paso.',
+      hint: 'Usa la estructura si/de otro modo correctamente. La prueba de escritorio debe trazar los valores paso a paso.',
     },
     {
       id: 's2p2', section: 2, pts: 3, difficulty: '⭐⭐',
@@ -66,11 +66,11 @@ SALIDAS: mayor`,
 ENTRADAS: temperatura (en °C)
 PROCESO:
   • Si temperatura < 0  → clasificacion = "Bajo cero"
-  • Si no, si temperatura <= 15 → clasificacion = "Fría"
-  • Si no, si temperatura <= 30 → clasificacion = "Templada"
-  • Si no → clasificacion = "Caliente"
+  • de otro modo, si temperatura <= 15 → clasificacion = "Fría"
+  • de otro modo, si temperatura <= 30 → clasificacion = "Templada"
+  • de otro modo → clasificacion = "Caliente"
 SALIDAS: clasificacion`,
-      hint: 'Requiere condicionales anidados (si/sino si). Prueba con al menos 4 valores distintos.',
+      hint: 'Requiere condicionales anidados (si/de otro modo si). Prueba con al menos 4 valores distintos.',
     },
     {
       id: 's2p3', section: 2, pts: 4, difficulty: '⭐⭐⭐',
@@ -82,12 +82,96 @@ PROCESO:
   • bono = 0
   • Si aniosServicio >= 5:
       Si salario < 1000 → bono = salario * 0.20
-      Si no → bono = salario * 0.10
-  • Si no (aniosServicio < 5):
+      de otro modo, → bono = salario * 0.10
+  • de otro modo, (aniosServicio < 5):
       bono = salario * 0.05
   • salarioFinal = salario + bono
 SALIDAS: bono, salarioFinal`,
-      hint: 'Condicionales anidados y múltiples variables. Prueba con: (salario=800, años=6), (salario=1200, años=7), (salario=500, años=2).',
+      hint: 'Condicionales anidados y múltiples variables. Prueba con: (salario=1200, años=7).',
+    },
+    {
+      id: 's2p4', section: 2, pts: 5, difficulty: '⭐⭐⭐',
+      title: 'Prueba de escritorio',
+      prompt: `Se te da el siguiente pseudocódigo, hagan la prueba de escritorio.
+
+Problema: Clasificación de tarifa eléctricaProblema: Clasificación de tarifa eléctrica
+Una empresa eléctrica cobra el consumo mensual de un cliente según estas reglas:
+
+Se conocen los kWh consumidos y si el cliente es residencial o comercial (1 = residencial, 2 = comercial)
+Clientes residenciales:
+
+Primeros 100 kWh → $0.09 por kWh
+De 101 a 300 kWh → los primeros 100 al precio anterior, el resto a $0.13 por kWh
+Más de 300 kWh → los primeros 100 a $0.09, los siguientes 200 a $0.13, el excedente a $0.18 por kWh
+
+
+Clientes comerciales: tarifa fija de $0.22 por kWh sin importar el consumo
+A todos los clientes se les aplica el ITBMS del 7% sobre el total calculado
+Mostrar: consumo, tarifa aplicada, subtotal, monto del ITBMS y total a pagar
+
+
+Algoritmo TarifaElectrica
+{
+    //Bloque declarativo de constantes
+    flotante ITBMS=0.07;  
+    //Bloque declarativo de variables
+    entero tipo_Cliente;
+    flotante impuestos, potenciaConsumida, potenciaInicial, potenciaMedia, potenciaAlta, potenciaFacturada, total, subtotal;
+    //Bloque de instrucciones
+    imprimir("Ingrese 1 para cliente residencial y ingrese 2 para cliente comercial");
+    leer(tipo_Cliente);
+    imprimir("Ingrese la potencia utilizada en kWh (kilovatios por hora)");
+    leer(potenciaConsumida);
+    potenciaFacturada = potenciaConsumida;
+    si(tipo_Cliente==1){
+      si(potenciaConsumida>300){
+        potenciaInicial = 100 * 0.09;
+        potenciaConsumida -= 100;
+        imprimir("Por los primeros 100 kWh se le cobrarán: $", potenciaInicial);
+        potenciaMedia = 100 * 0.13;
+        imprimir("Por los siguientes 100 kWh (200kWH) se le cobrarán: $", potenciaMedia);
+        potenciaConsumida -= 100;
+        potenciaAlta = potenciaConsumida * 0.18;
+        imprimir("Por los ", potenciaConsumida,"kWh restantes se le cobraran: $", potenciaAlta);
+        subtotal = potenciaInicial + potenciaMedia + potenciaAlta;
+      }
+      de otro modo si(potenciaConsumida>=101 && potenciaConsumida<=300){
+        potenciaInicial = 100 * 0.09;
+        potenciaConsumida -= 100;
+        imprimir("Por los primeros 100 kWh se le cobrarán: $", potenciaInicial);
+        potenciaMedia = potenciaConsumida * 0.13;
+        imprimir("Por los siguientes", potenciaConsumida,"se le cobrarán: $", potenciaMedia);
+        subtotal = potenciaInicial + potenciaMedia;
+      }
+      de otro modo si(potenciaConsumida<=100 && potenciaConsumida>0){
+        subtotal = potenciaConsumida * 0.13;
+        imprimir("Por los", potenciaConsumida,"kWh se le cobrarán: $", subtotal);
+      }
+      de otro modo{
+        imprimir("Incorrecta cantidad de potencia (nula o negativa), ingrese las cantidades nuevamente");
+      }
+      imprimir("Tipo de cliente: Residencial");
+    }
+    de otro modo si(tipo_Cliente==2){
+      si (potenciaConsumida>0){
+        subtotal = potenciaConsumida * 0.22;
+        imprimir("Por los", potenciaConsumida,"kWh se le cobrará: $", subtotal);
+      }
+      de otro modo{
+        imprimir("Incorrecta cantidad de potencia (nula o negativa), ingrese las cantidades nuevamente")
+      }
+      imprimir("Tipo de cliente: Comercial");
+    }
+      
+    de otro modo{
+      imprimir("Cliente desconocido, ingrese valores entre el 1 y 2");
+    }
+    impuesto = subtotal * ITBMS;
+    imprimir("El impuesto a cobrar es de: ", impuesto);
+    total = subtotal + impuesto;
+    imprimir("El total a pagar por", potenciaFacturada,"kWh fue de: $", total);
+}`,
+      hint: 'Son libres de hacer la prueba que quieran con el pseudocódigo dado, aunque intenten usar la combinación más rápida',
     },
   ],
 };
